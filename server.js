@@ -16,6 +16,7 @@ mongoose.connect(process.env.MONGO_URI)
     app.use('/api/review', require('./routes/review'));
     app.use('/api/item', require('./routes/item'));
     app.use('/api/order', require('./routes/order'));
+    app.use('/api/payment', require('./routes/payment'));
 
 app.get('/', (req, res) => {
     res.send('API is running');
