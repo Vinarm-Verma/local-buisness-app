@@ -6,22 +6,19 @@ const router = express.Router();
 router.post('/', async (req, res) => {
   try {
     const { name, category, description, address, lat, lng, contact, ownerId } = req.body;
-
     const business = await Business.create({
-      name: name,
-      category: category,
-      description: description,
-      address: address,
-      contact: contact,
-      ownerId: ownerId,
+      name,
+      category,
+      description,
+      address,
+      contact,
+      ownerId,
       location: {
         type: 'Point',
         coordinates: [lng, lat]
       }
     });
-
     res.json(business);
-
   } catch (error) {
     res.status(400).json({ message: 'Failed to add business', error: error.message });
   }
@@ -30,29 +27,34 @@ router.post('/', async (req, res) => {
 // FIND nearby businesses
 router.get('/nearby', async (req, res) => {
   try {
-    const { lat, lng, distance, category } = req.query;
-
+    const { lat, lng, distance = 5000, category } = req.query;
     const query = {
       location: {
         $near: {
-          $geometry: {
-            type: 'Point',
-            coordinates: [parseFloat(lng), parseFloat(lat)]
-          },
-          $maxDistance: parseInt(distance) || 5000
+          $geometry: { type: 'Point', coordinates: [parseFloat(lng), parseFloat(lat)] },
+          $maxDistance: parseInt(distance)
         }
       }
     };
-
     if (category) {
       query.category = category;
     }
-
     const businesses = await Business.find(query);
     res.json(businesses);
-
   } catch (error) {
     res.status(400).json({ message: 'Failed to fetch businesses', error: error.message });
+  }
+});
+
+// GET all businesses owned by a specific user
+// IMPORTANT: this route must stay ABOVE the "/:id" route below,
+// otherwise Express will treat "owner" as if it were an :id value
+router.get('/owner/:ownerId', async (req, res) => {
+  try {
+    const businesses = await Business.find({ ownerId: req.params.ownerId });
+    res.json(businesses);
+  } catch (error) {
+    res.status(400).json({ message: 'Failed to fetch owner businesses', error: error.message });
   }
 });
 
