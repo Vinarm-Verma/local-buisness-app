@@ -11,7 +11,8 @@ const userSchema = new mongoose.Schema({
       fullAddress: String,
       phone: String
     }
-  ]
+  ],
+  favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: "Business" }]
 });
 
 module.exports = mongoose.model("User", userSchema);
